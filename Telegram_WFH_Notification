@@ -1,0 +1,146 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "6cf7b46b-e404-47bd-9489-f5c0f902736a",
+      "name": "Listener",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "61f2e55d-a41d-4594-a045-154264c78738",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "tYpS2bddGWsl4cBk",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all inputs as array\nconst items = $input.all();\n\n// Loop through all items\nfor (const item of items) {\n  const text = (item.json.message?.text || \"\").toLowerCase();\n\n  if (text === \"start\") {\n    // Pass data to next node\n    return [\n      {\n        json: {\n          chatId: item.json.message.chat.id,\n          text: \"start\"\n        }\n      }\n    ];\n  }\n}\n\n// If none matched, stop workflow\nreturn [];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "d4646202-dcd0-4e10-99cb-ae54e43dc68b",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "amount": 3.5,
+        "unit": "hours"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        0
+      ],
+      "id": "a153e00a-f3aa-4a17-a48a-d8aad63db347",
+      "name": "Wait",
+      "webhookId": "4a9d7143-4338-417f-beec-6e076517e415",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listener').item.json.message.chat.id }}",
+        "text": "⏰ Your 3.5 hour timer is complete!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        0
+      ],
+      "id": "59b46d81-8756-44ba-a90c-b2f37976df2e",
+      "name": "Send a text message",
+      "webhookId": "c6ef56b9-3780-49be-9843-df012cf12fd2",
+      "credentials": {
+        "telegramApi": {
+          "id": "tYpS2bddGWsl4cBk",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listener').item.json.message.chat.id }}",
+        "text": "⏳ Timer started for 3.5 hours",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "04d2e94d-72de-437a-9c82-91f22dc3c4be",
+      "name": "Timer Started Notification",
+      "webhookId": "8569e857-68b4-47e1-a683-d16d4166730f",
+      "credentials": {
+        "telegramApi": {
+          "id": "tYpS2bddGWsl4cBk",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Listener": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Timer Started Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Timer Started Notification": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
